@@ -18,6 +18,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { isBase64Image } from "@/lib/utils";
+import { useUploadThing } from '@/lib/uploadthing'
 
 interface Props {
   user: {
@@ -48,16 +50,16 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
     e: ChangeEvent<HTMLInputElement>,
     fieldChange: (value: string) => void
   ) => {
-    e.preventDefault();
+    e.preventDefault();                                           // prevent browser refresh
 
     const fileReader = new FileReader();
 
-    if (e.target.files && e.target.files.length > 0) {
+    if (e.target.files && e.target.files.length > 0) {            // check if any file has been uploaded
       const file = e.target.files[0];
 
-      setFiles(Array.from(e.target.files));
+      setFiles(Array.from(e.target.files));                       // set the state with a shallow copy (array.from())
 
-      if (!file.type.includes("image")) return;
+      if (!file.type.includes("image")) return;                   // if the file isnt an image, ignore
 
       fileReader.onload = async (event) => {
         const imageDataURL = event.target?.result?.toString() || "";
@@ -70,9 +72,13 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
   };
 
   function onSubmit(values: z.infer<typeof UserValidation>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    const blob = values.profile_photo;
+
+    const hasImageChanged = isBase64Image(blob);
+
+    if(hasImageChanged) {
+      const imgRes = 
+    }
   }
 
   return (
