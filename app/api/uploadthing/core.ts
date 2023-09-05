@@ -2,7 +2,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { currentUser } from "@clerk/nextjs";
  
 const f = createUploadthing();
- 
+ // get the current signed in user from Clerk 
 const getUser = async () =>  await currentUser();
  
 // FileRouter for your app, can contain multiple FileRoutes

@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { isBase64Image } from "@/lib/utils";
-import { useUploadThing } from '@/lib/uploadthing'
+import { useUploadThing } from "@/lib/uploadthing";
 
 interface Props {
   user: {
@@ -34,7 +34,8 @@ interface Props {
 }
 
 const AccountProfile = ({ user, btnTitle }: Props) => {
-  const [file, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const { startUpload } = useUploadThing("media");
 
   const form = useForm({
     resolver: zodResolver(UserValidation),
@@ -50,16 +51,17 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
     e: ChangeEvent<HTMLInputElement>,
     fieldChange: (value: string) => void
   ) => {
-    e.preventDefault();                                           // prevent browser refresh
+    e.preventDefault(); // prevent browser refresh
 
     const fileReader = new FileReader();
 
-    if (e.target.files && e.target.files.length > 0) {            // check if any file has been uploaded
+    if (e.target.files && e.target.files.length > 0) {
+      // check if any file has been uploaded
       const file = e.target.files[0];
 
-      setFiles(Array.from(e.target.files));                       // set the state with a shallow copy (array.from())
+      setFiles(Array.from(e.target.files)); // set the state with a shallow copy (array.from())
 
-      if (!file.type.includes("image")) return;                   // if the file isnt an image, ignore
+      if (!file.type.includes("image")) return; // if the file isnt an image, ignore
 
       fileReader.onload = async (event) => {
         const imageDataURL = event.target?.result?.toString() || "";
@@ -71,15 +73,20 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
     }
   };
 
-  function onSubmit(values: z.infer<typeof UserValidation>) {
+  const onSubmit = async (values: z.infer<typeof UserValidation>) => {
     const blob = values.profile_photo;
 
     const hasImageChanged = isBase64Image(blob);
 
-    if(hasImageChanged) {
-      const imgRes = 
+    if (hasImageChanged) {
+      const imgRes = await startUpload(files);
+
+      // if upload was successful set the profile photo to the uploaded image
+      if (imgRes && imgRes[0].url) {
+        values.profile_photo = imgRes[0].url;
+      }
     }
-  }
+  };
 
   return (
     <Form {...form}>
