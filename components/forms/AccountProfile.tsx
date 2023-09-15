@@ -9,6 +9,10 @@ import { UserValidation } from "@/lib/validations/user";
 import Image from "next/image";
 import { ChangeEvent, useState } from "react";
 import { Textarea } from "../ui/textarea";
+import { usePathname, useRouter } from "next/navigation";
+import { isBase64Image } from "@/lib/utils";
+import { useUploadThing } from "@/lib/uploadthing";
+import { updateUser } from "@/lib/actions/user.actions";
 import {
   Form,
   FormControl,
@@ -18,8 +22,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { isBase64Image } from "@/lib/utils";
-import { useUploadThing } from "@/lib/uploadthing";
 
 interface Props {
   user: {
@@ -34,8 +36,10 @@ interface Props {
 }
 
 const AccountProfile = ({ user, btnTitle }: Props) => {
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]); // profile photo upload
   const { startUpload } = useUploadThing("media");
+  const router = useRouter();
+  const pathname = usePathname();
 
   const form = useForm({
     resolver: zodResolver(UserValidation),
@@ -85,6 +89,21 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
       if (imgRes && imgRes[0].url) {
         values.profile_photo = imgRes[0].url;
       }
+    }
+    await updateUser({
+      userID: user.id,
+      username: values.username,
+      name: values.name,
+      bio: values.bio,
+      image: values.profile_photo,
+      path: pathname,
+    });
+
+    if (pathname === "/profile/edit") {
+      // if editing profile, go to previous page
+      router.back();
+    } else {
+      router.push("/"); // if onboarding page, go to homepage
     }
   };
 
