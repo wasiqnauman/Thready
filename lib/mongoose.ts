@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 let isConnected = false;
 
@@ -9,9 +9,12 @@ export const connectToDB = async () => {
   if (isConnected) return console.log("Already connected to MongoDB");
 
   try {
-    await mongoose.connect(process.env.MONGODB_URL);
+    await mongoose.connect(process.env.MONGODB_URL, {
+      dbName: "threads_clone",
+    });
 
     isConnected = true;
+    console.log('MongoDB connected')
   } catch (error) {
     console.log(error);
   }

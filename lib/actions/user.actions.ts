@@ -51,7 +51,7 @@ export async function fetchUser(userID: string) {
   try {
     connectToDB();
     return await User
-      .findById(userID)
+      .findOne({ id: userID })
     // .populate({
     //   path: 'communities',
     //   model: Community
