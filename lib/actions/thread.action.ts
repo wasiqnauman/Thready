@@ -74,3 +74,111 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
 
   }
 }
+
+export async function fetchThreadByID(threadID: string) {
+  try {
+    connectToDB();
+
+
+    const query = Thread.findById(threadID)
+      .populate({ path: 'author', model: User, select: "_id id name image" })  // populate the author of the thread
+      .populate({                                                              // populate the children(comments) of the thread
+        path: 'children',
+        populate: [                                                            // populate the fields of the children(comment) threads
+          {
+            path: 'author',                                                    // populate the author of the children(comment) thread
+            model: User,
+            select: "_id id name parentID image"
+          },
+          {
+            path: 'children',                                                  // populate the children(replies) of the children(comment) thread
+            model: Thread,
+            populate: {
+              path: 'author',                                                  // populate the author of the replies to the comments on the threads
+              model: User,
+              select: "_id id name parentID image"
+            }
+          }
+        ]
+      })
+
+    const thread = await query.exec();
+    return thread;
+  } catch (error: any) {
+    throw new Error(`Unable to fetch thread ${error.message}`)
+
+  }
+}
+
+// export async function addCommentToThread(threadID: string, commentText: string, userID: string, path: string) {
+
+//   try {
+//     connectToDB();
+//     // check if the parentThread exists (eg: if someone entered the url directly into the browser)
+//     const parentThread = await Thread.findById(threadID);
+//     if (!parentThread)
+//       throw new Error(`Thread ${threadID} not found`)
+//     console.log('Thread found')
+
+//     // create the comment Thread
+//     const newComment = new Thread({
+//       text: commentText,
+//       author: userID,
+//       parentID: threadID
+//     })
+
+//     // save the comment thread to the database
+//     const savedNewComment = await newComment.save();
+
+//     // add the reference to the new comment to the Parent Thread children
+//     parentThread.children.push(savedNewComment._id);
+
+//     // save the parentThread with the comment
+//     await parentThread.save();
+
+//     // purge the cache and reload the items
+//     revalidatePath(path);
+
+
+//   } catch (error: any) {
+//     throw new Error(`Error adding comment to thread: ${error.message}`)
+//   }
+// }
+export async function addCommentToThread(
+  threadId: string,
+  commentText: string,
+  userId: string,
+  path: string
+) {
+  connectToDB();
+
+  try {
+    // Find the original thread by its ID
+    const originalThread = await Thread.findById(threadId);
+
+    if (!originalThread) {
+      throw new Error("Thread not found");
+    }
+
+    // Create the new comment thread
+    const commentThread = new Thread({
+      text: commentText,
+      author: userId,
+      parentId: threadId, // Set the parentId to the original thread's ID
+    });
+
+    // Save the comment thread to the database
+    const savedCommentThread = await commentThread.save();
+
+    // Add the comment thread's ID to the original thread's children array
+    originalThread.children.push(savedCommentThread._id);
+
+    // Save the updated original thread to the database
+    await originalThread.save();
+
+    revalidatePath(path);
+  } catch (err) {
+    console.error("Error while adding comment:", err);
+    throw new Error("Unable to add comment");
+  }
+}

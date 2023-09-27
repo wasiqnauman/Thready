@@ -11,7 +11,6 @@ export const ThreadValidation = z.object({
 export const CommentValidation = z.object({
   thread: z
     .string()
-    .url()
     .nonempty()
     .min(3, { message: "Thread content must be atleast 3 characters." }),
 });
