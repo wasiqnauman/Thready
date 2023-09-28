@@ -145,16 +145,16 @@ export async function fetchThreadByID(threadID: string) {
 //   }
 // }
 export async function addCommentToThread(
-  threadId: string,
+  threadID: string,
   commentText: string,
-  userId: string,
+  userID: string,
   path: string
 ) {
   connectToDB();
 
   try {
     // Find the original thread by its ID
-    const originalThread = await Thread.findById(threadId);
+    const originalThread = await Thread.findById(threadID);
 
     if (!originalThread) {
       throw new Error("Thread not found");
@@ -163,8 +163,8 @@ export async function addCommentToThread(
     // Create the new comment thread
     const commentThread = new Thread({
       text: commentText,
-      author: userId,
-      parentId: threadId, // Set the parentId to the original thread's ID
+      author: userID,
+      parentID: threadID, // Set the parentId to the original thread's ID
     });
 
     // Save the comment thread to the database
