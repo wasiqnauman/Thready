@@ -34,12 +34,13 @@ const Page = async ({ params }: { params: { id: string } }) => {
       </div>
 
       <div className="mt-7">
+        {/* add a comment */}
         <Comment
           threadID={thread.id}
           currentUserImage={userInfo?.image}
           currentUserID={userID}
         />
-
+        {/* display comments */}
         <div className="mt-10">
           {thread.children.map((comment: any) => (
             <ThreadCard
