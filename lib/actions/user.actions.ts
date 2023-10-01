@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import User from "../models/user.model";
 import { connectToDB } from "../mongoose"
-import mongoose from "mongoose";
+import mongoose, { FilterQuery, SortOrder } from "mongoose";
 import Thread from "../models/thread.model";
 
 
@@ -63,6 +63,7 @@ export async function fetchUser(userID: string) {
 
   }
 }
+
 export async function fetchUserPosts(userID: string) {
   try {
     connectToDB();
@@ -89,6 +90,52 @@ export async function fetchUserPosts(userID: string) {
 
   } catch (error: any) {
     throw new Error(`Unable to fetch user posts: ${error.message}`)
+
+  }
+}
+
+
+
+export async function fetchAllUsers({
+  userID,
+  searchString = "",
+  pageNumber = 1,
+  pageSize = 20,
+  sortBy = "desc"
+}: { userID: string, searchString?: string, pageNumber?: number, pageSize?: number, sortBy?: SortOrder }) {
+  try {
+    connectToDB();
+    // number of search results shown on previous pages, so we skip them
+    const skipAmount = (pageNumber - 1) * pageSize;
+    // regular expression for the search term
+    const regex = new RegExp(searchString, "i");
+    // create the query to get the search results from the database
+    const query: FilterQuery<typeof User> = {
+      id: { $ne: userID }
+
+    }
+
+    // if the search term isnt empty only then query the database
+    if (searchString.trim() !== '') {
+      query.$or = [
+        { username: { $regex: regex } },  // match the searchterm to the username or the name
+        { name: { $regex: regex } }
+      ]
+    }
+    const sortOptions = { createdAt: sortBy }
+
+
+    const usersQuery = User.find(query).sort(sortOptions).skip(skipAmount).limit(pageSize);
+    const totalUsersCount = await User.countDocuments(query);
+    const userList = await usersQuery.exec();
+
+    const isNext = totalUsersCount > skipAmount + userList.length;
+
+
+    return { userList, isNext };
+
+  } catch (error: any) {
+    throw new Error(`Unable to fetch user list ${error.message}`)
 
   }
 }
