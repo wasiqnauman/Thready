@@ -139,3 +139,28 @@ export async function fetchAllUsers({
 
   }
 }
+
+export async function getUserActivity(user_ID: string) {
+  try {
+    connectToDB();
+
+    // find all the threads created by the user (userID)
+    const userThreads = await Thread.find({ author: user_ID });
+    // find all the children of all the threads created by the user (userID)
+    const childrenThreadIDs = userThreads.reduce((acc, userThreads) => {
+      return acc.concat(userThreads.children);
+    }, []);
+    // find information about the authors who commented under the threads of the user (userID)
+    const replies = await Thread.find({
+      _id: { $in: childrenThreadIDs },   // find the threads which are the in the children of the threads created by the user (userID)
+      author: { $ne: user_ID }           // make sure they are not the comments of the user (userID) which is the author
+    }).populate({ path: 'author', model: User, select: 'name image _id' })      // get relevant information about the author of the comments
+
+
+    return replies
+
+  } catch (error: any) {
+    throw new Error(`Unable to fetch user activity: ${error.message}`)
+
+  }
+}
