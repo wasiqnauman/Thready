@@ -1,6 +1,5 @@
 import { fetchPosts } from "@/lib/actions/thread.action";
 import { UserButton } from "@clerk/nextjs";
-import { userAgent } from "next/server";
 import { currentUser } from "@clerk/nextjs";
 import ThreadCard from "@/components/cards/ThreadCard";
 
