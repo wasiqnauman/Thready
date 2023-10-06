@@ -9,11 +9,11 @@ import User from "../models/user.model";
 
 import { connectToDB } from "../mongoose";
 
-export async function fetchUser(userId: string) {
+export async function fetchUser(userID: string) {
   try {
     connectToDB();
 
-    return await User.findOne({ id: userId }).populate({
+    return await User.findOne({ id: userID }).populate({
       path: "communities",
       model: Community,
     });
@@ -23,7 +23,7 @@ export async function fetchUser(userId: string) {
 }
 
 interface Params {
-  userId: string;
+  userID: string;
   username: string;
   name: string;
   bio: string;
@@ -32,7 +32,7 @@ interface Params {
 }
 
 export async function updateUser({
-  userId,
+  userID,
   bio,
   name,
   path,
@@ -43,7 +43,7 @@ export async function updateUser({
     connectToDB();
 
     await User.findOneAndUpdate(
-      { id: userId },
+      { id: userID },
       {
         username: username.toLowerCase(),
         name,
@@ -62,12 +62,12 @@ export async function updateUser({
   }
 }
 
-export async function fetchUserPosts(userId: string) {
+export async function fetchUserPosts(userID: string) {
   try {
     connectToDB();
 
-    // Find all threads authored by the user with the given userId
-    const threads = await User.findOne({ id: userId }).populate({
+    // Find all threads authored by the user with the given userID
+    const threads = await User.findOne({ id: userID }).populate({
       path: "threads",
       model: Thread,
       populate: [
@@ -153,12 +153,12 @@ export async function fetchAllUsers({
   }
 }
 
-export async function getUserActivity(userId: string) {
+export async function getUserActivity(userID: string) {
   try {
     connectToDB();
 
     // Find all threads created by the user
-    const userThreads = await Thread.find({ author: userId });
+    const userThreads = await Thread.find({ author: userID });
 
     // Collect all the child thread ids (replies) from the 'children' field of each user thread
     const childThreadIds = userThreads.reduce((acc, userThread) => {
@@ -168,7 +168,7 @@ export async function getUserActivity(userId: string) {
     // Find and return the child threads (replies) excluding the ones created by the same user
     const replies = await Thread.find({
       _id: { $in: childThreadIds },
-      author: { $ne: userId }, // Exclude threads authored by the same user
+      author: { $ne: userID }, // Exclude threads authored by the same user
     }).populate({
       path: "author",
       model: User,
