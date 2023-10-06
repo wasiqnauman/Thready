@@ -96,13 +96,13 @@ export async function fetchUserPosts(userId: string) {
 
 // Almost similar to Thead (search + pagination) and Community (search + pagination)
 export async function fetchAllUsers({
-  userId,
+  userID,
   searchString = "",
   pageNumber = 1,
   pageSize = 20,
   sortBy = "desc",
 }: {
-  userId: string;
+  userID: string;
   searchString?: string;
   pageNumber?: number;
   pageSize?: number;
@@ -119,7 +119,7 @@ export async function fetchAllUsers({
 
     // Create an initial query object to filter users.
     const query: FilterQuery<typeof User> = {
-      id: { $ne: userId }, // Exclude the current user from the results.
+      id: { $ne: userID }, // Exclude the current user from the results.
     };
 
     // If the search string is not empty, add the $or operator to match either username or name fields.
@@ -141,12 +141,12 @@ export async function fetchAllUsers({
     // Count the total number of users that match the search criteria (without pagination).
     const totalUsersCount = await User.countDocuments(query);
 
-    const users = await usersQuery.exec();
+    const userList = await usersQuery.exec();
 
     // Check if there are more users beyond the current page.
-    const isNext = totalUsersCount > skipAmount + users.length;
+    const isNext = totalUsersCount > skipAmount + userList.length;
 
-    return { users, isNext };
+    return { userList, isNext };
   } catch (error) {
     console.error("Error fetching users:", error);
     throw error;
