@@ -86,8 +86,8 @@ const AccountProfile = ({ user, btnTitle }: Props) => {
       const imgRes = await startUpload(files);
 
       // if upload was successful set the profile photo to the uploaded image
-      if (imgRes && imgRes[0].url) {
-        values.profile_photo = imgRes[0].url;
+      if (imgRes && imgRes[0].fileUrl) {
+        values.profile_photo = imgRes[0].fileUrl;
       }
     }
     await updateUser({
