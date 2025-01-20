@@ -49,7 +49,7 @@ function PostThread({ userID }: { userID: string }) {
     await createThread({
       text: values.thread,
       author: userID,
-      communityId: organization ? organization.id : null,
+      communityID: organization ? organization.id : null,
       path: pathname,
     });
     router.push("/");
