@@ -3,10 +3,10 @@
 
 # Thready - Full-Stack Social Networking App
 
-**Thready** is a full-stack social networking application built using modern web technologies to provide seamless user interactions and scalable architecture. The app supports server-side rendering (SSR) for optimal performance and SEO, serverless APIs for scalability, and an intuitive user experience.
+**Thready** is a full-stack social networking, inspired by threads, application built using modern web technologies to provide seamless user interactions and scalable architecture. The app supports server-side rendering (SSR) for optimal performance and SEO, serverless APIs for scalability, and an intuitive user experience.
+Demo: https://threads-clone-chi-three.vercel.app
 
 ---
-Demo: https://threads-clone-chi-three.vercel.app
 
 ## 🚀 Features
 
